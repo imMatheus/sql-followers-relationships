@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id   String @id @default(cuid())
+  name String
+
+  followers Follower[] @relation("follows")
+  followes  Follower[] @relation("follower")
+  posts     Post[]
+}
+
+model Follower {
+  followerId String
+  follower   User   @relation("follower", fields: [followerId], references: [id])
+  followesId String
+  followes   User   @relation("follows", fields: [followesId], references: [id])
+
+  @@id([followerId, followesId])
+}
+
+model Post {
+  id String @id @default(cuid())
+
+  text    String
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+}
